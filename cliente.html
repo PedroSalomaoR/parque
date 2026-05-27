@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parque Digital — Meu Cartão</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<!-- Biblioteca para gerar QR Code -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0a0e1a;
+    --surface: #111827;
+    --card:    #1a2236;
+    --border:  rgba(255,255,255,0.08);
+    --text:    #f0f4ff;
+    --muted:   #8899bb;
+    --accent:  #f9c74f;
+    --green:   #06d6a0;
+    --pink:    #ff6b9d;
+    --blue:    #4cc9f0;
+    --purple:  #9d4edd;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 25%, rgba(255,255,255,.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 10%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 20% 50%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 90%, rgba(255,255,255,.5) 0%, transparent 100%);
+  }
+
+  .orb {
+    position: fixed; pointer-events: none; z-index: 0;
+    border-radius: 50%; filter: blur(80px); opacity: .15;
+  }
+  .orb1 { width: 350px; height: 350px; background: var(--green);  top: -80px; right: -80px; }
+  .orb2 { width: 300px; height: 300px; background: var(--blue);   bottom: -60px; left: -60px; }
+
+  .app {
+    position: relative; z-index: 1;
+    max-width: 420px; margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    display: flex; flex-direction: column; gap: 1.25rem;
+  }
+
+  /* ── HEADER ── */
+  .header { text-align: center; padding: .5rem 0; }
+  .header-badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--green);
+    background: rgba(6,214,160,.12);
+    border: 1px solid rgba(6,214,160,.25);
+    border-radius: 100px; padding: 4px 14px; margin-bottom: .75rem;
+  }
+  .header h1 {
+    font-family: 'Boogaloo', cursive;
+    font-size: 42px; line-height: 1;
+    text-shadow: 0 0 40px rgba(6,214,160,.25);
+  }
+  .header h1 span { color: var(--accent); }
+  .header p { font-size: 14px; color: var(--muted); margin-top: .4rem; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+  }
+  .card-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-label::before {
+    content: ''; display: block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  /* ── PERFIL ── */
+  .perfil {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(6,214,160,.3);
+  }
+  .perfil-info .nome {
+    font-size: 20px; font-weight: 900;
+    line-height: 1.2;
+  }
+  .perfil-info .sub {
+    font-size: 12px; color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── SALDO ── */
+  .saldo-card {
+    background: linear-gradient(135deg, rgba(6,214,160,.15), rgba(6,214,160,.05));
+    border: 1.5px solid rgba(6,214,160,.3);
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .saldo-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 70% 20%, rgba(6,214,160,.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .saldo-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--green);
+    opacity: .7; margin-bottom: .5rem;
+  }
+  .saldo-valor {
+    font-size: 48px; font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(6,214,160,.4);
+  }
+  .saldo-moeda {
+    font-size: 22px; font-weight: 700;
+    vertical-align: super;
+    margin-right: 4px;
+  }
+  .saldo-update {
+    font-size: 11px; color: var(--muted);
+    margin-top: .6rem;
+  }
+
+  /* ── QR CODE ── */
+  .qr-section {
+    text-align: center;
+  }
+  .qr-wrap {
+    display: inline-block;
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 0 40px rgba(6,214,160,.2), 0 0 0 4px rgba(6,214,160,.15);
+    margin: .75rem 0;
+    position: relative;
+  }
+  .qr-wrap canvas, .qr-wrap img {
+    display: block;
+    border-radius: 8px;
+  }
+  .qr-code-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* ── HISTÓRICO ── */
+  .hist-list {
+    display: flex; flex-direction: column; gap: .5rem;
+    max-height: 260px; overflow-y: auto;
+  }
+  .hist-list::-webkit-scrollbar { width: 4px; }
+  .hist-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .hist-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .6rem .9rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  .hist-item .tipo { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+  .hist-item .tipo.entrada { color: var(--green); }
+  .hist-item .tipo.saida   { color: var(--pink); }
+  .hist-item .data         { color: var(--muted); font-size: 11px; }
+  .hist-item .valor        { font-weight: 700; }
+
+  .empty-hist {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ── BTN VOLTAR ── */
+  .btn-back {
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 700;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px;
+    cursor: pointer;
+    background: rgba(255,255,255,.04);
+    color: var(--muted);
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-back:hover { color: var(--text); border-color: rgba(255,255,255,.15); background: rgba(255,255,255,.07); }
+
+  /* ── LOADING ── */
+  .loading-wrap {
+    text-align: center;
+    padding: 3rem 0;
+  }
+  .dot-row { display: flex; gap: 6px; justify-content: center; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    animation: blink .7s infinite alternate;
+  }
+  .dot:nth-child(2) { animation-delay: .2s; }
+  .dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { to { opacity: .2; } }
+
+  /* ── ERRO ── */
+  .erro-wrap {
+    text-align: center; padding: 2rem 0;
+  }
+  .erro-wrap p { color: var(--pink); font-size: 16px; font-weight: 700; margin-bottom: 1rem; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .app > * { animation: fadeUp .5s both; }
+  .app > *:nth-child(1) { animation-delay: .05s; }
+  .app > *:nth-child(2) { animation-delay: .10s; }
+  .app > *:nth-child(3) { animation-delay: .15s; }
+  .app > *:nth-child(4) { animation-delay: .20s; }
+  .app > *:nth-child(5) { animation-delay: .25s; }
+
+  /* ── FOOTER ── */
+  .footer { text-align: center; font-size: 12px; color: var(--muted); padding-top: .25rem; }
+
+  /* ── PULSE ── */
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(6,214,160,.2), 0 0 0 4px rgba(6,214,160,.15); }
+    50%       { box-shadow: 0 0 60px rgba(6,214,160,.35), 0 0 0 6px rgba(6,214,160,.25); }
+  }
+  .qr-wrap { animation: pulse 3s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="app" id="app">
+  <div class="loading-wrap">
+    <div class="dot-row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <p style="color:var(--muted);margin-top:1rem;font-size:14px;">Carregando seu cartão...</p>
+  </div>
+</div>
+
+<script>
+  const BASE = "http://127.0.0.1:5000";
+
+  // Pegar QR da URL
+  const params = new URLSearchParams(window.location.search);
+  const qr = params.get('qr');
+
+  if (!qr) {
+    window.location.href = 'login.html';
+  }
+
+  function fmtData(str) {
+    if (!str) return "—";
+    const d = new Date(str);
+    return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+  }
+
+  function renderPage(nome, saldo, transacoes) {
+    const app = document.getElementById('app');
+
+    app.innerHTML = `
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-badge">🎟️ Meu Cartão</div>
+        <h1>🎢 Parque <span>Digital</span></h1>
+        <p>Seu cartão de créditos pessoal</p>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="card">
+        <div class="card-label">Visitante</div>
+        <div class="perfil">
+          <div class="avatar">🎠</div>
+          <div class="perfil-info">
+            <div class="nome">${nome}</div>
+            <div class="sub">Visitante do Parque Digital</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SALDO -->
+      <div class="saldo-card">
+        <div class="saldo-label">Saldo Disponível</div>
+        <div class="saldo-valor">
+          <span class="saldo-moeda">R$</span>${saldo.toFixed(2).replace(".", ",")}
+        </div>
+        <div class="saldo-update">Atualizado agora</div>
+      </div>
+
+      <!-- QR CODE -->
+      <div class="card">
+        <div class="card-label">Seu QR Code</div>
+        <div class="qr-section">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:.75rem;">
+            Apresente este código nas catracas e atrações
+          </p>
+          <div class="qr-wrap" id="qr-container"></div>
+          <div class="qr-code-text" style="margin-top:.5rem;">${qr}</div>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div class="card">
+        <div class="card-label">Últimas Transações</div>
+        <div class="hist-list" id="hist-list">
+          ${transacoes.length === 0
+            ? '<div class="empty-hist">📭 Nenhuma transação ainda.</div>'
+            : transacoes.map(t => `
+              <div class="hist-item">
+                <span class="tipo ${t.tipo}">
+                  ${t.tipo === 'entrada' ? '↑ Crédito' : '↓ Uso'}
+                </span>
+                <span class="valor" style="color:${t.tipo==='entrada'?'var(--green)':'var(--pink)'}">
+                  ${t.tipo === 'entrada' ? '+' : '−'} R$ ${t.valor.toFixed(2).replace(".",",")}
+                </span>
+                <span class="data">${fmtData(t.data)}</span>
+              </div>
+            `).join('')
+          }
+        </div>
+      </div>
+
+      <!-- VOLTAR -->
+      <button class="btn-back" onclick="window.location.href='login.html'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Voltar ao Login
+      </button>
+
+      <div class="footer">Parque Digital © 2026 &mdash; Todos os créditos registrados</div>
+    `;
+
+    // Gerar QR Code
+    setTimeout(() => {
+      const container = document.getElementById('qr-container');
+      if (container) {
+        new QRCode(container, {
+          text: qr,
+          width: 180,
+          height: 180,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }
+    }, 100);
+  }
+
+  function renderErro(msg) {
+    document.getElementById('app').innerHTML = `
+      <div class="header">
+        <div class="header-badge">Parque Digital</div>
+        <h1>🎢 Parque <span>Digital</span></h1>
+      </div>
+      <div class="card">
+        <div class="erro-wrap">
+          <p>❌ ${msg}</p>
+        </div>
+      </div>
+      <button class="btn-back" onclick="window.location.href='login.html'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Voltar ao Login
+      </button>
+    `;
+  }
+
+  // Carregar dados do cliente
+  Promise.all([
+    fetch(BASE + "/saldo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ qr_code: qr })
+    }).then(r => r.json()),
+
+    fetch(BASE + "/historico", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ qr_code: qr })
+    }).then(r => r.json())
+  ])
+  .then(([saldoData, histData]) => {
+    if (saldoData.status !== 'ok') {
+      renderErro(saldoData.msg || 'Cliente não encontrado.');
+      return;
+    }
+    const transacoes = histData.status === 'ok' ? histData.transacoes : [];
+    renderPage(saldoData.nome, saldoData.saldo, transacoes);
+  })
+  .catch(() => {
+    renderErro('Servidor offline. Verifique se o Flask está rodando.');
+  });
+</script>
+
+</body>
+</html>
