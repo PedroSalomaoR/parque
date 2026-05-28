@@ -1,28 +1,25 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import pyodbc
+import psycopg2
 import os
 import uuid
 
 app = Flask(__name__)
 CORS(app)
 
-import psycopg2
-import os
-
+# ── CONEXÃO ──────────────────────────────────────────────────────────
 def get_conn():
     return psycopg2.connect(os.environ["DATABASE_URL"])
 
 # ── HELPER ───────────────────────────────────────────────────────────
 def buscar_cliente(cursor, qr_code):
     cursor.execute(
-        "SELECT cliente_id, nome, saldo_credito FROM cliente WHERE qr_code = ?",
+        "SELECT cliente_id, nome, saldo_credito FROM cliente WHERE qr_code = %s",
         (qr_code,)
     )
     return cursor.fetchone()
 
-# ── ROTAS ────────────────────────────────────────────────────────────
-
+# ── ROTAS DE ARQUIVOS ─────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @app.route("/")
@@ -41,6 +38,7 @@ def index():
 def cliente_page():
     return send_from_directory(BASE_DIR, "cliente.html")
 
+# ── SALDO ─────────────────────────────────────────────────────────────
 @app.route("/saldo", methods=["POST"])
 def saldo():
     data = request.get_json()
@@ -63,7 +61,7 @@ def saldo():
         if conn:
             conn.close()
 
-
+# ── ENTRADA ───────────────────────────────────────────────────────────
 @app.route("/entrada", methods=["POST"])
 def entrada():
     data = request.get_json()
@@ -88,11 +86,11 @@ def entrada():
         cliente_id, nome, saldo = cliente
         saldo = float(saldo)
         cursor.execute(
-            "UPDATE cliente SET saldo_credito = saldo_credito + ? WHERE cliente_id = ?",
+            "UPDATE cliente SET saldo_credito = saldo_credito + %s WHERE cliente_id = %s",
             (valor, cliente_id)
         )
         cursor.execute(
-            "INSERT INTO transacao (cliente_id, tipo, valor) VALUES (?, 'entrada', ?)",
+            "INSERT INTO transacao (cliente_id, tipo, valor) VALUES (%s, 'entrada', %s)",
             (cliente_id, valor)
         )
         conn.commit()
@@ -108,7 +106,7 @@ def entrada():
         if conn:
             conn.close()
 
-
+# ── SAIDA ─────────────────────────────────────────────────────────────
 @app.route("/saida", methods=["POST"])
 def saida():
     data  = request.get_json()
@@ -138,11 +136,11 @@ def saida():
                 "msg": f"Saldo insuficiente. Saldo atual: R$ {saldo:.2f} ❌"
             }), 400
         cursor.execute(
-            "UPDATE cliente SET saldo_credito = saldo_credito - ? WHERE cliente_id = ?",
+            "UPDATE cliente SET saldo_credito = saldo_credito - %s WHERE cliente_id = %s",
             (valor, cliente_id)
         )
         cursor.execute(
-            "INSERT INTO transacao (cliente_id, tipo, valor) VALUES (?, 'saida', ?)",
+            "INSERT INTO transacao (cliente_id, tipo, valor) VALUES (%s, 'saida', %s)",
             (cliente_id, valor)
         )
         conn.commit()
@@ -158,7 +156,7 @@ def saida():
         if conn:
             conn.close()
 
-
+# ── CADASTRAR ─────────────────────────────────────────────────────────
 @app.route("/cadastrar", methods=["POST"])
 def cadastrar():
     data = request.get_json()
@@ -167,7 +165,6 @@ def cadastrar():
     if not nome:
         return jsonify({"status": "erro", "msg": "Nome é obrigatório."}), 400
 
-    # QR Code único gerado automaticamente — não precisa mais vir do front
     qr = "PX-" + uuid.uuid4().hex[:8].upper()
 
     conn = None
@@ -175,16 +172,16 @@ def cadastrar():
         conn = get_conn()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO cliente (nome, qr_code) VALUES (?, ?)",
+            "INSERT INTO cliente (nome, qr_code) VALUES (%s, %s)",
             (nome, qr)
         )
         conn.commit()
         return jsonify({
             "status": "ok",
             "msg": f"Cliente '{nome}' cadastrado com sucesso! ✅",
-            "qr_code": qr   # <-- retorna o QR gerado para exibir no front
+            "qr_code": qr
         })
-    except pyodbc.IntegrityError:
+    except psycopg2.errors.UniqueViolation:
         return jsonify({"status": "erro", "msg": "Erro ao gerar QR Code único. Tente novamente."}), 409
     except Exception as e:
         return jsonify({"status": "erro", "msg": f"Erro interno: {str(e)}"}), 500
@@ -192,7 +189,7 @@ def cadastrar():
         if conn:
             conn.close()
 
-
+# ── HISTÓRICO ─────────────────────────────────────────────────────────
 @app.route("/historico", methods=["POST"])
 def historico():
     data = request.get_json()
@@ -209,13 +206,14 @@ def historico():
             return jsonify({"status": "erro", "msg": "Cliente não encontrado. ❌"}), 404
         cliente_id, nome, saldo = cliente
         cursor.execute("""
-            SELECT TOP 20 tipo, valor, data
+            SELECT tipo, valor, data
             FROM transacao
-            WHERE cliente_id = ?
+            WHERE cliente_id = %s
             ORDER BY data DESC
+            LIMIT 20
         """, (cliente_id,))
         transacoes = [
-            {"tipo": row.tipo, "valor": float(row.valor), "data": str(row.data)}
+            {"tipo": row[0], "valor": float(row[1]), "data": str(row[2])}
             for row in cursor.fetchall()
         ]
         return jsonify({
@@ -229,7 +227,6 @@ def historico():
     finally:
         if conn:
             conn.close()
-
 
 # ── START ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
