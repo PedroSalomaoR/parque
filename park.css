@@ -1,0 +1,230 @@
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #1a1a1a, #2e7d32);
+    color: white;
+    text-align: center;
+}
+
+.container {
+    margin-top: 60px;
+}
+
+h1 {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+input {
+    display: block;
+    margin: 10px auto;
+    padding: 12px;
+    width: 250px;
+    border-radius: 8px;
+    border: none;
+}
+
+.acoes button {
+    padding: 12px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    background: #00c853;
+    color: white;
+    cursor: pointer;
+}
+
+.acoes button:hover {
+    background: #00e676;
+}
+
+.brinquedos {
+    margin-top: 20px;
+}
+
+.brinquedos button {
+    display: block;
+    margin: 10px auto;
+    padding: 15px;
+    width: 260px;
+    border-radius: 10px;
+    border: none;
+    background: #ff9800;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.brinquedos button:hover {
+    background: #ffc107;
+}
+
+#resposta {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    text-align: center;
+}
+
+.container {
+    margin-top: 50px;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 42px;
+    color: #ffeb3b;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+h2 {
+    margin-top: 30px;
+    color: #ff9800;
+}
+
+input {
+    display: block;
+    margin: 12px auto;
+    padding: 14px;
+    width: 260px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+/* BOTÕES PRINCIPAIS */
+.acoes button {
+    padding: 14px;
+    margin: 6px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(45deg, #00c853, #64dd17);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.acoes button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #00e676, #76ff03);
+}
+
+/* BRINQUEDOS */
+.brinquedos {
+    margin-top: 20px;
+}
+
+.brinquedos button {
+    display: block;
+    margin: 10px auto;
+    padding: 16px;
+    width: 280px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+
+
+
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(180deg, #1b1b1b, #004d40);
+    color: white;
+    text-align: center;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+h1 {
+    color: #ffeb3b;
+}
+
+input {
+    display: block;
+    margin: 10px auto;
+    padding: 12px;
+    width: 250px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    padding: 12px;
+    margin: 5px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+/* AÇÕES */
+.acoes button {
+    background: #00c853;
+    color: white;
+}
+
+/* BRINQUEDOS */
+.brinquedos button {
+    display: block;
+    margin: 10px auto;
+    width: 260px;
+    background: #ff9800;
+    font-weight: bold;
+}
+
+/* VISOR */
+.visor {
+    margin: 30px auto;
+    padding: 20px;
+    width: 300px;
+    background: black;
+    border: 3px solid #00e676;
+    border-radius: 10px;
+    font-size: 20px;
+    color: #00ffcc;
+    box-shadow: 0 0 15px #00ffcc;
+}
+
+/* Cores individuais tipo parque */
+.brinquedos button:nth-child(1) {
+    background: linear-gradient(45deg, #ff4081, #f50057);
+}
+
+.brinquedos button:nth-child(2) {
+    background: linear-gradient(45deg, #40c4ff, #00b0ff);
+}
+
+.brinquedos button:nth-child(3) {
+    background: linear-gradient(45deg, #ff9100, #ff6d00);
+}
+
+.brinquedos button:nth-child(4) {
+    background: linear-gradient(45deg, #7c4dff, #651fff);
+}
+
+.brinquedos button:hover {
+    transform: scale(1.08);
+}
+
+/* RESPOSTA */
+#resposta {
+    margin-top: 25px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+}
